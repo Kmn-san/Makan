@@ -8,19 +8,35 @@ export interface Restaurant {
     address: string | null;
 }
 
+export interface DiningTable {
+    id: string;
+    table_code: string;
+}
+
+export type OrderType = 'pickup' | 'dine_in';
+
 interface RestaurantState {
     selectedRestaurant: Restaurant | null;
+    selectedTable: DiningTable | null;
+    orderType: OrderType;
     selectRestaurant: (r: Restaurant) => void;
+    setOrderType: (t: OrderType) => void;
+    setTable: (t: DiningTable | null) => void;
 }
 
 export const useRestaurantStore = create<RestaurantState>()(
     persist(
         (set) => ({
             selectedRestaurant: null,
-            selectRestaurant: (r) => set({ selectedRestaurant: r }),
+            selectedTable: null,
+            orderType: 'pickup',
+            selectRestaurant: (r) =>
+                set({ selectedRestaurant: r, selectedTable: null, orderType: 'pickup' }),
+            setOrderType: (t) => set({ orderType: t }),
+            setTable: (t) => set({ selectedTable: t }),
         }),
         {
-            name: 'selected-restaurant',
+            name: 'restaurant-store',
             storage: createJSONStorage(() => AsyncStorage),
         }
     )

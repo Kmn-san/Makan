@@ -26,3 +26,10 @@ export const getMyOrders = async (restaurantId: string) => {
     });
     return response.data;
 };
+
+export const resolveTable = async (restaurantId: string, tableCode: string) => {
+    const response = await api.get('/tables/resolve', {
+        params: { restaurantId, tableCode },
+    });
+    return response.data;
+};

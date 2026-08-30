@@ -1,0 +1,1 @@
+export const formatRM = (cents: number) => `RM ${(cents / 100).toFixed(2)}`;
