@@ -1,19 +1,9 @@
+import { DiningTable, OrderType, Restaurant } from '@/types/restaurant';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-export interface Restaurant {
-    id: string;
-    name: string;
-    address: string | null;
-}
 
-export interface DiningTable {
-    id: string;
-    table_code: string;
-}
-
-export type OrderType = 'pickup' | 'dine_in';
 
 interface RestaurantState {
     selectedRestaurant: Restaurant | null;

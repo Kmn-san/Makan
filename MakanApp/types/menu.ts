@@ -15,8 +15,9 @@ export interface OptionGroup {
 export interface MenuItem {
     id: string;
     name: string;
-    description: string | null;
+    descriptions: string | null;
     price_cents: number;
+    image_url?: string | null;
     rating?: number;
     options: OptionGroup[];
 }

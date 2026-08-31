@@ -1,11 +1,13 @@
 import { getRestaurants } from '@/lib/api';
-import { Restaurant, useRestaurantStore } from '@/store/restaurantStore';
+import { useRestaurantStore } from '@/store/restaurantStore';
+import { Restaurant } from '@/types/restaurant';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     FlatList,
+    Image, // 🌟 Add this
     RefreshControl,
     Text,
     TouchableOpacity,
@@ -17,24 +19,41 @@ interface RestaurantCardProps {
     onSelect: (restaurant: Restaurant) => void;
 }
 
-const RestaurantCard = ({ item, onSelect }: RestaurantCardProps) => (
-    <TouchableOpacity
-        className="flex-row items-center bg-white rounded-2xl p-4 mb-3 shadow-sm border border-gray-100"
-        onPress={() => onSelect(item)}
-        activeOpacity={0.8}
-    >
-        <View className="w-[52px] h-[52px] rounded-2xl bg-[#FFF1EE] justify-center items-center mr-3">
-            <Ionicons name="storefront-outline" size={26} color="#FF5A3C" />
-        </View>
-        <View className="flex-1">
-            <Text className="text-[17px] font-bold text-gray-900">{item.name}</Text>
-            <Text className="text-gray-500 mt-0.5 text-[13px]" numberOfLines={1}>
-                {item.address ?? 'No address'}
-            </Text>
-        </View>
-        <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
-    </TouchableOpacity>
-);
+// 🌟 Now a proper component (needs useState for the image fallback)
+const RestaurantCard = ({ item, onSelect }: RestaurantCardProps) => {
+    const [imageFailed, setImageFailed] = useState(false);
+    const showImage = !!item.image_url && !imageFailed;
+
+    return (
+        <TouchableOpacity
+            className="flex-row items-center bg-white rounded-2xl p-4 mb-3 shadow-sm border border-gray-100"
+            onPress={() => onSelect(item)}
+            activeOpacity={0.8}
+        >
+            {/* 🌟 Restaurant photo (or icon fallback) */}
+            {showImage ? (
+                <Image
+                    source={{ uri: item.image_url! }}
+                    className="w-[64px] h-[64px] rounded-2xl mr-3"
+                    resizeMode="cover"
+                    onError={() => setImageFailed(true)}
+                />
+            ) : (
+                <View className="w-[64px] h-[64px] rounded-2xl bg-[#FFF1EE] justify-center items-center mr-3">
+                    <Ionicons name="storefront-outline" size={28} color="#FF5A3C" />
+                </View>
+            )}
+
+            <View className="flex-1">
+                <Text className="text-[17px] font-bold text-gray-900">{item.name}</Text>
+                <Text className="text-gray-500 mt-0.5 text-[13px]" numberOfLines={1}>
+                    {item.address ?? 'No address'}
+                </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+        </TouchableOpacity>
+    );
+};
 
 export default function HomeScreen() {
     const [restaurants, setRestaurants] = useState<Restaurant[]>([]);

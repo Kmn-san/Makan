@@ -2,7 +2,7 @@ import { query } from "../utils/db.js";
 
 export const getActiveRestaurants = async () => {
     const { rows } = await query(`
-        SELECT id, name, address
+        SELECT id, name, address, image_url
         FROM restaurant
         WHERE is_active = TRUE
         ORDER BY name ASC
