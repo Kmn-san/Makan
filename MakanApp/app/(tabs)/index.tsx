@@ -1,4 +1,7 @@
+// app/(tabs)/index.tsx
 import { getRestaurants } from '@/lib/api';
+import { HomeHeader } from '@/components/HomeHeader';
+import { RestaurantCard } from '@/components/RestaurantCard';
 import { useRestaurantStore } from '@/store/restaurantStore';
 import { Restaurant } from '@/types/restaurant';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,53 +10,10 @@ import { useCallback, useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     FlatList,
-    Image, // 🌟 Add this
     RefreshControl,
     Text,
-    TouchableOpacity,
     View,
 } from 'react-native';
-
-interface RestaurantCardProps {
-    item: Restaurant;
-    onSelect: (restaurant: Restaurant) => void;
-}
-
-// 🌟 Now a proper component (needs useState for the image fallback)
-const RestaurantCard = ({ item, onSelect }: RestaurantCardProps) => {
-    const [imageFailed, setImageFailed] = useState(false);
-    const showImage = !!item.image_url && !imageFailed;
-
-    return (
-        <TouchableOpacity
-            className="flex-row items-center bg-white rounded-2xl p-4 mb-3 shadow-sm border border-gray-100"
-            onPress={() => onSelect(item)}
-            activeOpacity={0.8}
-        >
-            {/* 🌟 Restaurant photo (or icon fallback) */}
-            {showImage ? (
-                <Image
-                    source={{ uri: item.image_url! }}
-                    className="w-[64px] h-[64px] rounded-2xl mr-3"
-                    resizeMode="cover"
-                    onError={() => setImageFailed(true)}
-                />
-            ) : (
-                <View className="w-[64px] h-[64px] rounded-2xl bg-[#FFF1EE] justify-center items-center mr-3">
-                    <Ionicons name="storefront-outline" size={28} color="#FF5A3C" />
-                </View>
-            )}
-
-            <View className="flex-1">
-                <Text className="text-[17px] font-bold text-gray-900">{item.name}</Text>
-                <Text className="text-gray-500 mt-0.5 text-[13px]" numberOfLines={1}>
-                    {item.address ?? 'No address'}
-                </Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
-        </TouchableOpacity>
-    );
-};
 
 export default function HomeScreen() {
     const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -93,10 +53,8 @@ export default function HomeScreen() {
 
     return (
         <View className="flex-1 bg-[#F9FAFB]">
-            <View className="bg-[#FF5A3C] pt-[60px] pb-6 px-5">
-                <Text className="text-[32px] font-extrabold text-white">Makan! 🍽️</Text>
-                <Text className="text-[#FFE4DE] mt-1 text-[15px]">Where would you like to eat today?</Text>
-            </View>
+            {/* 🌟 The Header is now just one line! */}
+            <HomeHeader />
 
             {loading ? (
                 <View className="flex-1 justify-center items-center">
@@ -107,18 +65,46 @@ export default function HomeScreen() {
                     data={restaurants}
                     keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
-                        <RestaurantCard
-                            item={item}
-                            onSelect={handleSelect}
-                        />
+                        <RestaurantCard item={item} onSelect={handleSelect} />
                     )}
-                    contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
+                    contentContainerStyle={{
+                        paddingHorizontal: 16,
+                        paddingTop: 20,
+                        paddingBottom: 32,
+                    }}
                     refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={handleRefresh}
+                            tintColor="#FF5A3C"
+                        />
+                    }
+                    ListHeaderComponent={
+                        restaurants.length > 0 ? (
+                            <View className="mb-4">
+                                <Text className="text-[20px] font-extrabold text-gray-900">
+                                    Restaurants
+                                </Text>
+                                <Text className="text-gray-500 text-sm mt-1">
+                                    Choose a restaurant to start ordering
+                                </Text>
+                            </View>
+                        ) : null
                     }
                     ListEmptyComponent={
-                        <Text className="text-center text-gray-500 mt-10">No restaurants available yet.</Text>
+                        <View className="items-center justify-center mt-16 px-6">
+                            <View className="w-20 h-20 bg-[#FFF1EE] rounded-full items-center justify-center mb-4">
+                                <Ionicons name="restaurant-outline" size={38} color="#FF5A3C" />
+                            </View>
+                            <Text className="text-lg font-bold text-gray-900">
+                                No restaurants yet
+                            </Text>
+                            <Text className="text-gray-500 text-sm text-center mt-2">
+                                There are currently no restaurants available. Please check again later.
+                            </Text>
+                        </View>
                     }
+                    showsVerticalScrollIndicator={false}
                 />
             )}
         </View>

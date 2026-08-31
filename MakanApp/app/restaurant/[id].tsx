@@ -20,6 +20,8 @@ import {
     NativeScrollEvent,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useCartStore } from '@/store/cartStore';
+import { formatRM } from '@/utils/format';
 
 export default function RestaurantDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
@@ -42,8 +44,8 @@ export default function RestaurantDetailScreen() {
     const [isImageVisible, setIsImageVisible] = useState(true);
 
     // Mock cart data
-    const cartItems = 3;
-    const cartTotal = 2580;
+    const totalItems = useCartStore((s) => s.getTotalItems());
+    const totalPrice = useCartStore((s) => s.getTotalPrice());
 
     // Animated value for scroll
     const scrollY = useRef(new Animated.Value(0)).current;
@@ -367,30 +369,34 @@ export default function RestaurantDetailScreen() {
                     />
 
                     {/* Bottom Cart Bar */}
-                    <View className="absolute bottom-10 left-0 right-0 px-5">
-                        <TouchableOpacity
-                            className="flex-row justify-between items-center bg-[#FF5A3C] rounded-xl px-6 py-4 shadow-lg"
-                            onPress={() => router.push('/cart')}
-                            activeOpacity={0.8}
-                            style={{
-                                shadowColor: '#FF5A3C',
-                                shadowOffset: { width: 0, height: 4 },
-                                shadowOpacity: 0.3,
-                                shadowRadius: 8,
-                                elevation: 8,
-                            }}
-                        >
-                            <View className="flex-row items-center">
-                                <View className="bg-white/20 rounded-full px-3 py-1 mr-3">
-                                    <Text className="text-white font-bold">{cartItems} items</Text>
+                    {totalItems > 0 && (
+                        <View className="absolute bottom-10 left-0 right-0 px-5">
+                            <TouchableOpacity
+                                className="flex-row justify-between items-center bg-[#FF5A3C] rounded-xl px-6 py-4 shadow-lg"
+                                onPress={() => router.push('/cart')}
+                                activeOpacity={0.8}
+                                style={{
+                                    shadowColor: '#FF5A3C',
+                                    shadowOffset: { width: 0, height: 4 },
+                                    shadowOpacity: 0.3,
+                                    shadowRadius: 8,
+                                    elevation: 8,
+                                }}
+                            >
+                                <View className="flex-row items-center">
+                                    <View className="bg-white/20 rounded-full px-3 py-1 mr-3">
+                                        <Text className="text-white font-bold">
+                                            {totalItems} {totalItems === 1 ? 'item' : 'items'}
+                                        </Text>
+                                    </View>
+                                    <Text className="text-white font-semibold">
+                                        {formatRM(totalPrice)}
+                                    </Text>
                                 </View>
-                                <Text className="text-white font-semibold">
-                                    RM {(cartTotal / 100).toFixed(2)}
-                                </Text>
-                            </View>
-                            <Text className="text-white font-bold">Checkout</Text>
-                        </TouchableOpacity>
-                    </View>
+                                <Text className="text-white font-bold">Checkout</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
                 </>
             )}
         </SafeAreaView>

@@ -1,4 +1,5 @@
 import { getMenu } from '@/lib/api';
+import { useCartStore } from '@/store/cartStore';
 import { useRestaurantStore } from '@/store/restaurantStore';
 import { MenuItem, OptionGroup, OptionValue } from '@/types/menu';
 import { formatRM } from '@/utils/format';
@@ -18,14 +19,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function MenuItemDetailScreen() {
-    const { restaurantId, itemId } = useLocalSearchParams<{
-        restaurantId: string;
-        itemId: string;
-    }>();
+    const { itemId } = useLocalSearchParams<{ itemId: string }>();
 
     const router = useRouter();
     const restaurant = useRestaurantStore((s) => s.selectedRestaurant);
-
+    const restaurantId = restaurant?.id;
+    const addItem = useCartStore((s) => s.addItem);
     const [menuItem, setMenuItem] = useState<MenuItem | null>(null);
     const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState(1);
@@ -160,10 +159,6 @@ export default function MenuItemDetailScreen() {
                 backgroundColor="#ffffff"
             />
 
-            {/* ===================================================== */}
-            {/* STICKY TOP HEADER */}
-            {/* ===================================================== */}
-
             <Animated.View
                 className="absolute top-0 left-0 right-0 z-50"
                 style={{
@@ -239,10 +234,6 @@ export default function MenuItemDetailScreen() {
                     </View>
                 )}
             </Animated.View>
-
-            {/* ===================================================== */}
-            {/* SCROLLABLE CONTENT */}
-            {/* ===================================================== */}
 
             <Animated.ScrollView
                 className="flex-1"
@@ -322,10 +313,6 @@ export default function MenuItemDetailScreen() {
 
                 </View>
 
-                {/* ================================================= */}
-                {/* OPTIONS */}
-                {/* ================================================= */}
-
                 {menuItem.options.length > 0 && (
                     <View className="bg-white px-5 py-5 mb-3">
 
@@ -383,8 +370,8 @@ export default function MenuItemDetailScreen() {
                                                             value.id
                                                         }
                                                         className={`flex-row items-center justify-between py-3 border-b border-gray-100 ${isSelected
-                                                                ? 'bg-[#FFF1EE]'
-                                                                : ''
+                                                            ? 'bg-[#FFF1EE]'
+                                                            : ''
                                                             }`}
                                                         onPress={() =>
                                                             toggleOption(
@@ -402,8 +389,8 @@ export default function MenuItemDetailScreen() {
 
                                                             <View
                                                                 className={`w-5 h-5 border-2 rounded-full mr-3 items-center justify-center ${isSelected
-                                                                        ? 'border-[#FF5A3C] bg-[#FF5A3C]'
-                                                                        : 'border-gray-300'
+                                                                    ? 'border-[#FF5A3C] bg-[#FF5A3C]'
+                                                                    : 'border-gray-300'
                                                                     }`}
                                                             >
                                                                 {isSelected && (
@@ -446,10 +433,6 @@ export default function MenuItemDetailScreen() {
                 <View className="h-6" />
 
             </Animated.ScrollView>
-
-            {/* ===================================================== */}
-            {/* BOTTOM ADD TO CART */}
-            {/* ===================================================== */}
 
             <View className="bg-white border-t border-gray-200 px-5 py-4">
 
@@ -511,13 +494,8 @@ export default function MenuItemDetailScreen() {
                 <TouchableOpacity
                     className="bg-[#FF5A3C] rounded-xl py-4 items-center"
                     onPress={() => {
-                        console.log('Add to Cart:', {
-                            menuItemId: menuItem.id,
-                            quantity,
-                            options: selectedOptions,
-                        });
-
-                        router.back();
+                        addItem(menuItem, quantity, selectedOptions); // 🌟 Add to cart!
+                        router.back(); // Go back to menu
                     }}
                     activeOpacity={0.8}
                 >
