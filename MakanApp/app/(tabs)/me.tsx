@@ -43,6 +43,34 @@ export default function MeScreen() {
         );
     };
 
+    const handleDeleteAccount = () => {
+        Alert.alert(
+            "Delete Account",
+            "Are you sure you want to delete your account?",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel",
+                },
+                {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: async () => {
+                        try {
+                            router.replace("/(tabs)");
+                        } catch (error) {
+                            console.error("Delete error:", error);
+                            Alert.alert(
+                                "Delete Failed",
+                                "Something went wrong. Please try again."
+                            );
+                        }
+                    },
+                },
+            ]
+        );
+    };
+
     const handleNavigateToLogin = () => {
         router.push("/(auth)/login");
     };
@@ -129,6 +157,18 @@ export default function MeScreen() {
                 >
                     <Text className="text-red-500 font-bold text-base">
                         Log Out
+                    </Text>
+                </TouchableOpacity>
+            </View>
+
+            <View className="mt-6">
+                <TouchableOpacity
+                    onPress={handleDeleteAccount}
+                    activeOpacity={0.7}
+                    className="w-full bg-white border border-red-200 rounded-xl py-4 items-center"
+                >
+                    <Text className="text-red-500 font-bold text-base">
+                        Delete Account
                     </Text>
                 </TouchableOpacity>
             </View>

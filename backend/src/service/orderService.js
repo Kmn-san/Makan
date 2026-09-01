@@ -24,13 +24,7 @@ export const processOrderCreation = async ({
     }
 
     const menuItemIds = items.map(i => i.menuItemId);
-
-    if (new Set(menuItemIds).size !== menuItemIds.length) {
-        throw {
-            code: 'DUPLICATE_MENU_ITEMS',
-            message: "Duplicate menu items in cart. Please combine quantities."
-        };
-    }
+    const uniqueMenuItemIds = [...new Set(menuItemIds)];
 
     const client = await pool.connect();
 
@@ -41,12 +35,12 @@ export const processOrderCreation = async ({
         // 1. 批量获取并验证菜品
         // ==========================================
         const { rows: dbMenuItems } = await client.query(`
-            SELECT id, name, price_cents
-            FROM menu_items
-            WHERE id = ANY($1) AND restaurant_id = $2 AND is_available = TRUE
-        `, [menuItemIds, restaurantId]);
+    SELECT id, name, price_cents
+    FROM menu_items
+    WHERE id = ANY($1) AND restaurant_id = $2 AND is_available = TRUE
+`, [uniqueMenuItemIds, restaurantId]);
 
-        if (dbMenuItems.length !== menuItemIds.length) {
+        if (dbMenuItems.length !== uniqueMenuItemIds.length) {
             throw {
                 code: 'INVALID_MENU_ITEM',
                 message: "One or more menu items are invalid, unavailable, or belong to another restaurant."
@@ -62,10 +56,10 @@ export const processOrderCreation = async ({
         // 2. 批量获取所有相关选项组
         // ==========================================
         const { rows: allOptionGroups } = await client.query(`
-            SELECT id, menu_item_id, name, min_select, max_select
-            FROM menu_item_options
-            WHERE menu_item_id = ANY($1)
-        `, [menuItemIds]);
+    SELECT id, menu_item_id, name, min_select, max_select
+    FROM menu_item_options
+    WHERE menu_item_id = ANY($1)
+`, [uniqueMenuItemIds]);
 
         const optionGroupsByItem = {};
         allOptionGroups.forEach(g => {

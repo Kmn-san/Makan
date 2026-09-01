@@ -10,21 +10,23 @@ import {
     ActivityIndicator,
     Animated,
     Image,
-    ScrollView,
     StatusBar,
     Text,
+    TextInput,
     TouchableOpacity,
     View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function MenuItemDetailScreen() {
     const { itemId } = useLocalSearchParams<{ itemId: string }>();
 
     const router = useRouter();
+    const insets = useSafeAreaInsets();
     const restaurant = useRestaurantStore((s) => s.selectedRestaurant);
     const restaurantId = restaurant?.id;
     const addItem = useCartStore((s) => s.addItem);
+    const [note, setNote] = useState('');
     const [menuItem, setMenuItem] = useState<MenuItem | null>(null);
     const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState(1);
@@ -36,9 +38,6 @@ export default function MenuItemDetailScreen() {
 
     // Scroll animation
     const scrollY = useRef(new Animated.Value(0)).current;
-
-    // Search state
-    const [isSearchOpen, setIsSearchOpen] = useState(false);
 
     useEffect(() => {
         if (!restaurantId || !itemId) return;
@@ -59,6 +58,7 @@ export default function MenuItemDetailScreen() {
 
                 setMenuItem(found || null);
                 setImageFailed(false);
+                setNote('');
             } catch (error) {
                 console.error('Failed to load item:', error);
             } finally {
@@ -140,101 +140,33 @@ export default function MenuItemDetailScreen() {
         extrapolate: 'clamp',
     });
 
-    const headerButtonBackground = scrollY.interpolate({
-        inputRange: [0, 120],
-        outputRange: ['rgba(0,0,0,0.40)', 'rgba(243,244,246,1)'],
-        extrapolate: 'clamp',
-    });
-
-    const iconColor = scrollY.interpolate({
-        inputRange: [0, 120],
-        outputRange: ['#FFFFFF', '#111827'],
-        extrapolate: 'clamp',
-    });
 
     return (
-        <SafeAreaView className="flex-1 bg-[#F9FAFB]">
-            <StatusBar
-                barStyle="dark-content"
-                backgroundColor="#ffffff"
-            />
 
+        <SafeAreaView className="flex-1 bg-[#F9FAFB]" edges={['bottom']}>
+            <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+
+            {/* 🌟 2. The Floating Header */}
             <Animated.View
-                className="absolute top-0 left-0 right-0 z-50"
+                className="absolute left-0 right-0 z-50"
                 style={{
                     backgroundColor: headerBackground,
+                    paddingTop: insets.top, // 
                 }}
             >
-                <View className="px-4 pt-3 pb-3 flex-row items-center justify-between">
+                <View className="px-4 pb-3 flex-row items-center justify-between">
 
                     {/* Back Button */}
                     <TouchableOpacity
                         onPress={() => router.back()}
+                        className="w-10 h-10 bg-black/30 rounded-full items-center justify-center"
                         activeOpacity={0.7}
                     >
-                        <Animated.View
-                            className="w-10 h-10 rounded-full items-center justify-center"
-                            style={{
-                                backgroundColor: headerButtonBackground,
-                            }}
-                        >
-                            <Animated.Text>
-                                <Ionicons
-                                    name="arrow-back"
-                                    size={22}
-                                    color="#111827"
-                                />
-                            </Animated.Text>
-                        </Animated.View>
-                    </TouchableOpacity>
-
-                    {/* Search Button */}
-                    <TouchableOpacity
-                        onPress={() =>
-                            setIsSearchOpen(!isSearchOpen)
-                        }
-                        activeOpacity={0.7}
-                    >
-                        <Animated.View
-                            className="w-10 h-10 rounded-full items-center justify-center"
-                            style={{
-                                backgroundColor: headerButtonBackground,
-                            }}
-                        >
-                            <Ionicons
-                                name={
-                                    isSearchOpen
-                                        ? 'close'
-                                        : 'search'
-                                }
-                                size={22}
-                                color="#111827"
-                            />
-                        </Animated.View>
+                        <Ionicons name="arrow-back" size={22} color="#fff" />
                     </TouchableOpacity>
 
                 </View>
-
-                {/* Search Bar */}
-                {isSearchOpen && (
-                    <View className="px-4 pb-3">
-                        <View className="flex-row items-center bg-[#F3F4F6] rounded-xl px-4 py-3">
-                            <Ionicons
-                                name="search"
-                                size={20}
-                                color="#9CA3AF"
-                            />
-
-                            <Text
-                                className="flex-1 ml-2 text-base text-gray-500"
-                            >
-                                Search menu...
-                            </Text>
-                        </View>
-                    </View>
-                )}
             </Animated.View>
-
             <Animated.ScrollView
                 className="flex-1"
                 showsVerticalScrollIndicator={false}
@@ -428,7 +360,29 @@ export default function MenuItemDetailScreen() {
 
                     </View>
                 )}
-
+                <View className="bg-white px-5 py-5 mb-3">
+                    <Text className="text-lg font-bold text-gray-900 mb-3">
+                        Special Instructions
+                    </Text>
+                    <View className="flex-row items-center bg-[#F3F4F6] rounded-xl px-4 py-3">
+                        <Ionicons name="create-outline" size={20} color="#9CA3AF" />
+                        <TextInput
+                            className="flex-1 ml-2 text-base text-gray-900"
+                            placeholder="e.g. No onions, extra spicy, allergies..."
+                            placeholderTextColor="#9CA3AF"
+                            value={note}
+                            onChangeText={setNote}
+                            multiline
+                            numberOfLines={2}
+                            maxLength={200}
+                            textAlignVertical="top"
+                            style={{ minHeight: 44 }}
+                        />
+                    </View>
+                    <Text className="text-gray-400 text-xs mt-2 text-right">
+                        {note.length}/200
+                    </Text>
+                </View>
                 {/* Extra bottom space so content isn't hidden */}
                 <View className="h-6" />
 
@@ -494,8 +448,8 @@ export default function MenuItemDetailScreen() {
                 <TouchableOpacity
                     className="bg-[#FF5A3C] rounded-xl py-4 items-center"
                     onPress={() => {
-                        addItem(menuItem, quantity, selectedOptions); // 🌟 Add to cart!
-                        router.back(); // Go back to menu
+                        addItem(menuItem, quantity, selectedOptions, note);
+                        router.back();
                     }}
                     activeOpacity={0.8}
                 >

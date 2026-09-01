@@ -12,7 +12,7 @@ export interface CartItemOption {
 }
 
 export interface CartItem {
-    id: string; // Unique ID for this cart entry (item + options combo)
+    id: string;
     menuItemId: string;
     menuItemName: string;
     menuItemDescription: string | null;
@@ -20,6 +20,7 @@ export interface CartItem {
     quantity: number;
     options: CartItemOption[];
     imageUrl?: string | null;
+    note?: string;
 }
 
 interface CartState {
@@ -29,7 +30,8 @@ interface CartState {
     addItem: (
         menuItem: MenuItem,
         quantity: number,
-        selectedOptions: Record<string, string[]>
+        selectedOptions: Record<string, string[]>,
+        note?: string
     ) => void;
 
     removeItem: (cartItemId: string) => void;
@@ -44,14 +46,15 @@ interface CartState {
 // Helper: Generate unique ID for cart item (based on item + options)
 const generateCartItemId = (
     menuItemId: string,
-    selectedOptions: Record<string, string[]>
+    selectedOptions: Record<string, string[]>,
+    note?: string
 ): string => {
     const optionString = Object.entries(selectedOptions)
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([groupId, valueIds]) => `${groupId}:${valueIds.sort().join(',')}`)
         .join('|');
-
-    return `${menuItemId}|${optionString}`;
+    const noteString = (note || '').trim();
+    return `${menuItemId}|${optionString}|note:${noteString}`;
 };
 
 // Helper: Calculate item price with options
@@ -68,8 +71,8 @@ export const useCartStore = create<CartState>()(
         (set, get) => ({
             items: [],
 
-            addItem: (menuItem, quantity, selectedOptions) => {
-                const cartItemId = generateCartItemId(menuItem.id, selectedOptions);
+            addItem: (menuItem, quantity, selectedOptions, note) => {
+                const cartItemId = generateCartItemId(menuItem.id, selectedOptions, note);
 
                 // Flatten selected options into CartItemOption array
                 const options: CartItemOption[] = [];
@@ -114,6 +117,7 @@ export const useCartStore = create<CartState>()(
                             quantity,
                             options,
                             imageUrl: menuItem.image_url,
+                            note: note?.trim() || undefined,
                         };
 
                         return {

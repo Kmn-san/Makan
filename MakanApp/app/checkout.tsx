@@ -1,4 +1,5 @@
 import RequireAuth from '@/components/RequireAuth';
+import { createOrder, payOrder } from '@/lib/api';
 import { useCartStore, CartItem } from '@/store/cartStore';
 import { useRestaurantStore } from '@/store/restaurantStore';
 import { formatRM } from '@/utils/format';
@@ -45,42 +46,75 @@ export default function CheckoutScreen() {
     const serviceTax = Math.round(subtotal * 0.10); // 10% Service Tax
     const total = subtotal + sst + serviceTax;
 
+    // 🌟 DEV ONLY: flip to true to preview the failed screen
+    const SIMULATE_PAYMENT_FAILURE = false;
+
     const handlePayment = async () => {
+        if (items.length === 0 || isProcessing) return;
+
+        if (!restaurant?.id) {
+            Alert.alert('Checkout Failed', 'Restaurant not found.');
+            return;
+        }
+
+        if (orderType === 'dine_in' && !selectedTable?.id) {
+            Alert.alert('Table Required', 'Please scan your table QR code first.');
+            return;
+        }
+
         setIsProcessing(true);
 
         try {
-            // 🌟 TODO: Replace this with your real backend API call
-            // const orderData = {
-            //     restaurantId: restaurant.id,
-            //     orderType,
-            //     diningTableId: orderType === 'dine_in' ? selectedTable?.id : undefined,
-            //     paymentMethod: selectedPayment,
-            //     items: items.map(item => ({
-            //         menuItemId: item.menuItemId,
-            //         quantity: item.quantity,
-            //         options: item.options,
-            //     })),
-            // };
-            // const response = await createOrder(orderData);
+            // 1. Create order first
+            const created = await createOrder({
+                restaurantId: restaurant.id,
+                orderType,
+                diningTableId:
+                    orderType === 'dine_in'
+                        ? selectedTable?.id
+                        : undefined,
+                items: items.map((item) => ({
+                    menuItemId: item.menuItemId,
+                    quantity: item.quantity,
+                    note: item.note,
+                    optionValueIds: item.options.map((opt) => opt.valueId),
+                })),
+            });
 
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            const order = created.data;
 
-            // 🌟 Clear cart after successful payment
+            // 2. Pay the created order
+            const paid = await payOrder(order.orderId);
+
+            // 3. Clear cart only after successful payment
             clearCart();
 
-            Alert.alert(
-                'Order Placed! 🎉',
-                `Your order has been placed successfully.\n\nTotal: ${formatRM(total)}\nPayment: ${selectedPayment}`,
-                [
-                    {
-                        text: 'View Orders',
-                        onPress: () => router.replace('/(tabs)/orders'),
-                    },
-                ]
-            );
-        } catch (error) {
-            Alert.alert('Payment Failed', 'Something went wrong. Please try again.');
+            // 4. Go success screen
+            router.replace({
+                pathname: '/payment/success',
+                params: {
+                    amount: String(paid.data.totalCents ?? order.totalCents),
+                    orderType: paid.data.orderType ?? orderType,
+                    pickupNumber: paid.data.pickupNumber ?? '',
+                    tableCode: selectedTable?.table_code ?? '',
+                },
+            });
+
+        } catch (error: any) {
+            console.error('Payment error:', error?.response?.data || error);
+
+            const reason =
+                error?.response?.data?.message ||
+                'Payment failed. Please try again.';
+
+            router.replace({
+                pathname: '/payment/failed',
+                params: {
+                    amount: String(total),
+                    orderCode: 'UNKNOWN',
+                    reason,
+                },
+            });
         } finally {
             setIsProcessing(false);
         }

@@ -24,9 +24,9 @@ export const processMockPayment = async (orderId, customerId) => {
         const order = orders[0];
         if (order.payment_status !== 'pending_payment') {
             throw {
-                code: "",
+                code: "ORDER_CANNOT_BE_PAID",
                 message: `Order cannot be paid. Current payment status: ${order.payment_status}`
-            }
+            };
         }
 
         // for pickup generate pickup number
@@ -68,7 +68,9 @@ export const processMockPayment = async (orderId, customerId) => {
         return {
             orderId: order.id,
             paymentStatus: 'paid',
-            pickupNumber: pickupNumber // 返回给前端，让 App 弹出取餐号
+            pickupNumber,
+            totalCents: order.total_cents,
+            orderType: order.order_type
         };
 
     } catch (error) {

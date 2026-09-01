@@ -18,18 +18,8 @@ export const getMyOrders = async (req, res) => {
             });
         }
 
-        // 从 Query 参数获取餐厅 ID
-        const { restaurantId } = req.query;
-        if (!restaurantId) {
-            return res.status(400).json({
-                success: false,
-                code: 'MISSING_RESTAURANT_ID',
-                message: "restaurantId is required."
-            });
-        }
-
         // 调用 Service 获取订单
-        const orders = await customerService.getCustomerOrders(customer.id, restaurantId);
+        const orders = await customerService.getCustomerOrders(customer.id);
 
         return res.status(200).json({
             success: true,

@@ -4,5 +4,5 @@ import { mockPayment } from "../controller/paymentController.js";
 
 const router = Router();
 
-router.post('/:orderId/pay', mockPayment)
+router.post('/:orderId/pay', protectRoute, mockPayment)
 export default router;

@@ -30,7 +30,7 @@ export function MenuItemCard({ item, restaurantId }: MenuItemCardProps) {
             });
         } else {
             // 🌟 No options → quick add to cart
-            addItem(item, 1, {});
+            addItem(item, 1, {}, '');
         }
     };
 

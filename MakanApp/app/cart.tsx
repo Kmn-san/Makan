@@ -2,7 +2,7 @@ import { useCartStore, CartItem } from '@/store/cartStore';
 import { formatRM } from '@/utils/format';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import {  ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function CartScreen() {
@@ -82,6 +82,16 @@ export default function CartScreen() {
                                     <Text className="text-gray-500 text-sm mt-1">
                                         {item.options.map((opt) => opt.valueName).join(' · ')}
                                     </Text>
+                                )}
+
+                                {/*Show the note */}
+                                {item.note && (
+                                    <View className="flex-row items-start mt-2 bg-[#FFF7ED] rounded-lg px-2 py-1.5">
+                                        <Ionicons name="chatbubble-ellipses-outline" size={12} color="#FF5A3C" style={{ marginTop: 2 }} />
+                                        <Text className="text-[#FF5A3C] text-xs ml-1 flex-1">
+                                            {item.note}
+                                        </Text>
+                                    </View>
                                 )}
                             </View>
 

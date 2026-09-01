@@ -16,14 +16,17 @@ export const getMenu = async (restaurantId: string) => {
 
 //  Order APIs (For later)
 export const createOrder = async (orderData: any) => {
-    const response = await api.post('/orders', orderData);
+    const response = await api.post('/order', orderData);
     return response.data;
 };
 
-export const getMyOrders = async (restaurantId: string) => {
-    const response = await api.get('/customer/orders', {
-        params: { restaurantId }
-    });
+export const payOrder = async (orderId: string) => {
+    const response = await api.post(`/payments/${orderId}/pay`);
+    return response.data;
+};
+
+export const getMyOrders = async () => {
+    const response = await api.get('/customer/orders');
     return response.data;
 };
 
