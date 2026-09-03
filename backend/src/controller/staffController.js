@@ -4,6 +4,7 @@ import crypto from 'crypto';
 
 export const staffLogin = async (req, res) => {
     const { restaurantId, staffCode, pin, deviceName } = req.body;
+
     if (!restaurantId || !staffCode || !pin) {
         return res.status(400).json({
             success: false, message: "All fields are required!"

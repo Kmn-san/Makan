@@ -24,6 +24,7 @@ export default function Login() {
             await login({
                 staffCode,
                 pin,
+                restaurantId: import.meta.env.VITE_RESTAURANT_ID
             });
         } catch (error) {
             console.error("Login failed:", error);
