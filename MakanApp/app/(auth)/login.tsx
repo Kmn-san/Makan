@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -10,18 +10,32 @@ import {
   Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
-import { useSSO } from '@clerk/expo';
+import { useAuth, useSSO } from '@clerk/expo';
 
 WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { startSSOFlow } = useSSO();
-
   const [isLoading, setIsLoading] = useState(false);
+  const { isLoaded, isSignedIn } = useAuth()
+  const { startSSOFlow } = useSSO();
+  const { redirect } = useLocalSearchParams<{ redirect?: string }>();
+
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      if (redirect) {
+        // Send them back to where they came from (e.g., /checkout)
+        router.replace(redirect as any);
+      } else {
+        // Default behavior if they just opened the app and logged in
+        router.replace('/(tabs)');
+      }
+    }
+  }, [isLoaded, isSignedIn, redirect, router]);
+
 
   const handleOAuth = async (
     strategy: 'oauth_google' | 'oauth_apple'
@@ -33,8 +47,6 @@ export default function LoginScreen() {
     try {
       const redirectUrl = Linking.createURL('/sso-callback');
 
-      console.log('OAuth redirect URL:', redirectUrl);
-
       const {
         createdSessionId,
         setActive,
@@ -44,11 +56,7 @@ export default function LoginScreen() {
       });
 
       if (createdSessionId) {
-        await setActive!({
-          session: createdSessionId,
-        });
-
-        router.replace('/(tabs)');
+        await setActive!({ session: createdSessionId });
       }
     } catch (error: any) {
       console.error('OAuth error:', error);

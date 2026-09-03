@@ -53,7 +53,6 @@ export default function HomeScreen() {
 
     return (
         <View className="flex-1 bg-[#F9FAFB]">
-            {/* 🌟 The Header is now just one line! */}
             <HomeHeader />
 
             {loading ? (

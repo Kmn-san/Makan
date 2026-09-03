@@ -1,9 +1,11 @@
 import { useAuth } from '@clerk/expo';
-import { Redirect } from 'expo-router';
+import { Redirect, usePathname } from 'expo-router';
 import { ActivityIndicator, View } from 'react-native';
 
 export default function RequireAuth({ children }: { children: React.ReactNode }) {
     const { isLoaded, isSignedIn } = useAuth();
+    const pathname = usePathname();
+    console.log(pathname);
 
     if (!isLoaded) {
         return (
@@ -15,7 +17,14 @@ export default function RequireAuth({ children }: { children: React.ReactNode })
 
     // 🌟 Only protected screens redirect to sign-in
     if (!isSignedIn) {
-        return <Redirect href="/(auth)/sign-in" />;
+        return (
+            <Redirect
+                href={{
+                    pathname: '/(auth)/login',
+                    params: { redirect: pathname }
+                }}
+            />
+        );
     }
 
     return <>{children}</>;

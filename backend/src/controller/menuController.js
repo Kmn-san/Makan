@@ -9,32 +9,40 @@ export const getMenu = async (req, res) => {
             return res.status(400).json({ success: false, code: "INVALID_RESTAURANT_ID" })
         }
 
+        // get the categories and item
         const categories = await menuService.getCategories(restaurantId);
         const items = await menuService.getItems(restaurantId)
 
+        // if all items are empty just retun the categories
         if (items.length === 0) {
             return res.status(200).json({ success: true, data: categories })
         }
 
+        // get items id and option(suger, ice level)
         const itemIds = items.map(item => item.id);
         const options = await menuService.getOptions(itemIds);
 
+
+        // get values for option
         let values = [];
         if (options.length > 0) {
             const optionIds = options.map(opt => opt.id);
             values = await menuService.getValues(optionIds)
         }
-        // A. 把选项值按 option_id 分组
+        // arrange group for values using option id
         const valuesByOption = {};
         values.forEach(v => {
+            // if didnt exist then create a new group
             if (!valuesByOption[v.option_id]) valuesByOption[v.option_id] = [];
+            // else push inside the exist group
             valuesByOption[v.option_id].push(v);
         });
 
-        // B. 把选项值塞进选项组，并把选项组按 menu_item_id 分组
+        // insert values into options and group with menu_item_id
         const optionsByItem = {};
         options.forEach(o => {
-            o.values = valuesByOption[o.id] || []; // 挂载值
+            // if there are values then give the values else show [] to represent no values for this option
+            o.values = valuesByOption[o.id] || [];
             if (!optionsByItem[o.menu_item_id]) optionsByItem[o.menu_item_id] = [];
             optionsByItem[o.menu_item_id].push(o);
         });

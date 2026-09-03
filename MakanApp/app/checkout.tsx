@@ -46,9 +46,6 @@ export default function CheckoutScreen() {
     const serviceTax = Math.round(subtotal * 0.10); // 10% Service Tax
     const total = subtotal + sst + serviceTax;
 
-    // 🌟 DEV ONLY: flip to true to preview the failed screen
-    const SIMULATE_PAYMENT_FAILURE = false;
-
     const handlePayment = async () => {
         if (items.length === 0 || isProcessing) return;
 
