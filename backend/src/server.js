@@ -5,6 +5,7 @@ import staffRoutes from "./routes/staffRoutes.js"
 import kitchenRoutes from "./routes/kitchenRoutes.js"
 import cashierRoutes from "./routes/cashierRoutes.js"
 import adminRoutes from "./routes/adminRoutes.js";
+import devicesRoutes from "./routes/devicesRoutes.js";
 
 import restaurantRoutes from "./routes/restaurantRoutes.js"
 import tableRoutes from "./routes/tableRoutes.js"
@@ -32,6 +33,7 @@ app.use("/api/staff", staffRoutes)
 app.use("/api/staff/kitchen", kitchenRoutes)
 app.use('/api/staff/cashier', cashierRoutes);
 app.use('/api/admin', adminRoutes)
+app.use("/api/devices", devicesRoutes)
 
 app.use('/api/restaurants', restaurantRoutes);
 app.use('/api/tables', tableRoutes);

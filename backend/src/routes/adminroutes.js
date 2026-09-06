@@ -8,6 +8,9 @@ const router = Router();
 router.use(verifyStaffToken);
 router.use(requireAdminOrOwner);
 
+// router.post("/:deviceId/revoke", revokeDevice)
+
+
 // 获取后台菜单列表
 router.get('/menu/items', getMenuItems);
 

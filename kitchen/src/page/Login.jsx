@@ -67,7 +67,7 @@ export default function Login() {
                         </svg>
                     </div>
                     <h2 className="text-3xl font-bold text-gray-800">Welcome Back</h2>
-                    <p className="text-gray-500 mt-2">Sign in to your account</p>
+                    <p className="text-gray-500 mt-2">Login to your kitchen dashboard</p>
                 </div>
 
                 {/* Error Message */}
@@ -90,7 +90,7 @@ export default function Login() {
                 <form onSubmit={handleLogin} className="space-y-5">
                     <div>
                         <label htmlFor="staffCode" className="block text-sm font-medium text-gray-700 mb-1">
-                            Staff Code
+                            Restaurant Id
                         </label>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -103,49 +103,11 @@ export default function Login() {
                                 type="text"
                                 value={staffCode}
                                 onChange={(e) => setStaffCode(e.target.value)}
-                                placeholder="Enter your staff code"
+                                placeholder="Enter Restaurant Id"
                                 className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
                                 disabled={loading}
                             />
                         </div>
-                    </div>
-
-                    <div>
-                        <label htmlFor="pin" className="block text-sm font-medium text-gray-700 mb-1">
-                            PIN
-                        </label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                </svg>
-                            </div>
-                            <input
-                                id="pin"
-                                type="password"
-                                value={pin}
-                                onChange={(e) => setPin(e.target.value)}
-                                placeholder="Enter your PIN"
-                                className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
-                                disabled={loading}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                            <input
-                                id="remember-me"
-                                type="checkbox"
-                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                            />
-                            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                                Remember me
-                            </label>
-                        </div>
-                        <a href="#" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">
-                            Forgot PIN?
-                        </a>
                     </div>
 
                     <button
@@ -162,20 +124,11 @@ export default function Login() {
                                 <span>Logging in...</span>
                             </>
                         ) : (
-                            "Sign In"
+                            "Login"
                         )}
                     </button>
                 </form>
 
-                {/* Footer */}
-                <div className="text-center text-sm text-gray-500">
-                    <p>
-                        Need help?{" "}
-                        <a href="#" className="text-indigo-600 hover:text-indigo-500 font-medium">
-                            Contact Support
-                        </a>
-                    </p>
-                </div>
             </div>
         </div>
     );

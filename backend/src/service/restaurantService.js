@@ -9,3 +9,12 @@ export const getActiveRestaurants = async () => {
     `);
     return rows;
 };
+
+export const getRestaurantById = async (restaurandId) => {
+    const { rows } = await query(`
+        SELECT id, name, address, 
+        FROM restaurant
+        WHERE is_active = TRUE AND id = $1
+    `, [restaurandId]);
+    return rows;
+};

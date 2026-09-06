@@ -1,6 +1,5 @@
 import * as adminService from "../service/adminService.js";
 
-// 1. 获取后台菜单列表
 export const getMenuItems = async (req, res) => {
     try {
         const staff = req.staff;
