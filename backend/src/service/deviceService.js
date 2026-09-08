@@ -1,4 +1,5 @@
 import { query } from "../utils/db.js"
+import crypto from "crypto";
 
 export const createDeviceUsingRestaurandId = async (restaurantId) => {
     const device_uuid = crypto.randomUUID();
@@ -11,7 +12,7 @@ export const createDeviceUsingRestaurandId = async (restaurantId) => {
         status
         ) 
         VALUES(
-        $1, $2, $3,'active'
+        $1, $2, $3,'pending'
         )
         RETURNING * 
         `, [device_uuid, restaurantId, token]
@@ -45,17 +46,19 @@ export const updateLastSeen = async (device_uuid) => {
 export const logout = async (device_uuid, token) => {
     const { rows } = await query(
         `UPDATE devices SET status = 'revoked'
-        WHERE device_uuid = $1 and token = $2`,
+        WHERE device_uuid = $1 and token = $2
+        RETURNING *`,
         [device_uuid, token]
     )
-    return [0]
+    return rows[0]
 }
 
 export const updateName = async (device_uuid, deviceName) => {
-    await query(
+    const { rows } = await query(
         `UPDATE devices SET device_name = $1
-        WHERE device_uuid = $2`,
+        WHERE device_uuid = $2
+        RETURNING *`,
         [deviceName, device_uuid]
     )
-    return [0]
+    return rows[0]
 }

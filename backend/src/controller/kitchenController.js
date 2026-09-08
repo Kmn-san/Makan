@@ -2,14 +2,8 @@ import * as kitchenService from "../service/kitchenService.js";
 
 export const getOrders = async (req, res) => {
     try {
-        // 🌟 req.staff 是由 verifyStaffToken 中间件挂载的
-        const staff = req.staff;
-        if (!staff) {
-            return res.status(401).json({ success: false, message: "Unauthorized" });
-        }
-
-        // 使用员工所属的餐厅 ID 进行多租户隔离查询
-        const orders = await kitchenService.getKitchenOrders(staff.restaurantId);
+        const { restaurant_id: restaurantId } = req.device;
+        const orders = await kitchenService.getKitchenOrders(restaurantId);
 
         return res.status(200).json({
             success: true,
@@ -41,7 +35,7 @@ export const updateOrderStatus = async (req, res) => {
 
         const result = await kitchenService.updateKitchenOrderStatus(
             orderId,
-            staff.restaurantId,
+            restaurantId,
             staff.staffId,
             status
         );

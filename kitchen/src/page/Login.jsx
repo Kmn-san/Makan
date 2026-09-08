@@ -1,34 +1,40 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
-    const { login } = useAuth();
-
-    const [staffCode, setStaffCode] = useState("");
-    const [pin, setPin] = useState("");
+    const [restaurantCode, setRestaurantCode] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const navigate = useNavigate();
+    const { authenticate, clearInvalidDevice } = useAuth();
 
     const handleLogin = async (e) => {
         e.preventDefault();
         setError("");
 
-        // Basic validation
-        if (!staffCode || !pin) {
-            setError("Please fill in all fields");
+        if (!restaurantCode) {
+            setError("Please enter a restaurant ID");
             return;
         }
 
         try {
             setLoading(true);
-            await login({
-                staffCode,
-                pin,
-                restaurantId: import.meta.env.VITE_RESTAURANT_ID
-            });
-        } catch (error) {
-            console.error("Login failed:", error);
-            setError("Invalid credentials. Please try again.");
+            const data = await authenticate(restaurantCode);
+
+            if (data.status === "pending") {
+                navigate("/waiting-approval");
+            } else {
+                navigate("/");
+            }
+        } catch (err) {
+            const backendMessage = err.response?.data?.message;
+            if (backendMessage?.toLowerCase().includes("revoked")) {
+                clearInvalidDevice();
+                setError("This device was revoked. Please register again.");
+            } else {
+                setError(backendMessage || "Login failed. Please try again.");
+            }
         } finally {
             setLoading(false);
         }
@@ -89,8 +95,8 @@ export default function Login() {
                 {/* Login Form */}
                 <form onSubmit={handleLogin} className="space-y-5">
                     <div>
-                        <label htmlFor="staffCode" className="block text-sm font-medium text-gray-700 mb-1">
-                            Restaurant Id
+                        <label htmlFor="restaurantCode" className="block text-sm font-medium text-gray-700 mb-1">
+                            Restaurant Code
                         </label>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -99,12 +105,12 @@ export default function Login() {
                                 </svg>
                             </div>
                             <input
-                                id="staffCode"
+                                id="restaurantCode"
                                 type="text"
-                                value={staffCode}
-                                onChange={(e) => setStaffCode(e.target.value)}
-                                placeholder="Enter Restaurant Id"
-                                className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
+                                value={restaurantCode}
+                                onChange={(e) => setRestaurantCode(e.target.value)}
+                                placeholder="Enter Restaurant Code"
+                                className="input input-bordered w-full pl-10"
                                 disabled={loading}
                             />
                         </div>

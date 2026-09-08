@@ -2,7 +2,6 @@ import crypto from 'crypto';
 import { clerkClient, requireAuth, getAuth } from "@clerk/express";
 import * as staffService from "../service/staffService.js"
 import * as customerService from "../service/customerService.js"
-import * as restaurantService from "../service/restaurantService.js";
 import * as deviceService from "../service/deviceService.js";
 
 
@@ -68,44 +67,7 @@ export const requireAdminOrOwner = (req, res, next) => {
     next();
 };
 
-export const verifyOrRegisterDevice = async (req, res, next) => {
-    try {
-        const { restaurantId, device_uuid, token } = req.body;
-        if (!restaurantId) {
-            return res.status(404).json({ success: false, message: "Restaurant Id must be insert" })
-        }
 
-        const restaurant = await restaurantService.getRestaurantById(restaurantId)
-        if (!restaurant) {
-            return res.status(404).json({ success: false, message: "No such restaurant" });
-        }
-
-        if (!device_uuid) {
-            const newDevice = await deviceService.createDeviceUsingRestaurandId(restaurantId)
-            return res.status(201).json({
-                success: true,
-                message: "Device registered",
-                device_uuid: newDevice.device_uuid,
-                token: newDevice.token
-            })
-        }
-
-        req.device = device;
-        req.restaurant = restaurant;
-
-        deviceService.updateLastSeen(device.device_uuid).catch(err =>
-            console.error('Failed to update last_seen_at:', err)
-        );
-
-        next();
-    } catch (error) {
-        console.error('Device Verify Error:', error);
-        return res.status(500).json({
-            success: false,
-            message: 'Internal server error during verify device.'
-        });
-    }
-}
 
 export const requireAuthDevice = async (req, res, next) => {
     const authHeader = req.headers['authorization']; // "Bearer <token>"

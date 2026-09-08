@@ -30,7 +30,7 @@ app.get("/", (req, res) => {
 })
 
 app.use("/api/staff", staffRoutes)
-app.use("/api/staff/kitchen", kitchenRoutes)
+app.use("/api/kitchen", kitchenRoutes)
 app.use('/api/staff/cashier', cashierRoutes);
 app.use('/api/admin', adminRoutes)
 app.use("/api/devices", devicesRoutes)
