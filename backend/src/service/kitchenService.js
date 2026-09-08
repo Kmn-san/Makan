@@ -3,7 +3,7 @@ import { pool, query } from "../utils/db.js";
 export const getKitchenOrders = async (restaurantId) => {
     // 🌟 厨房只关心需要制作的订单 (paid 和 preparing)
     // 已经 ready (待取餐) 或 completed (已完成) 的单子不需要显示在看板上
-    const allowedStatuses = ['paid', 'preparing'];
+    const allowedStatuses = ['paid', 'preparing', 'ready'];
 
     const { rows } = await query(`
         SELECT 
@@ -53,11 +53,12 @@ export const getKitchenOrders = async (restaurantId) => {
     return rows;
 };
 
-export const updateKitchenOrderStatus = async (orderId, restaurantId, staffId, newStatus) => {
+export const updateKitchenOrderStatus = async (orderId, restaurantId, status) => {
     // 🌟 定义厨房允许的状态流转规则 (状态机)
     const VALID_TRANSITIONS = {
         'paid': ['preparing'],       // 厨房接单
-        'preparing': ['ready']       // 厨房完成制作
+        'preparing': ['ready'],
+        'ready':['completed']       // 厨房完成制作
     };
 
     const client = await pool.connect();
@@ -73,9 +74,9 @@ export const updateKitchenOrderStatus = async (orderId, restaurantId, staffId, n
         `, [orderId, restaurantId]);
 
         if (rows.length === 0) {
-            throw { 
-                code: 'ORDER_NOT_FOUND_OR_UNAUTHORIZED', 
-                message: 'Order not found in your restaurant.' 
+            throw {
+                code: 'ORDER_NOT_FOUND_OR_UNAUTHORIZED',
+                message: 'Order not found in your restaurant.'
             };
         }
 
@@ -83,10 +84,10 @@ export const updateKitchenOrderStatus = async (orderId, restaurantId, staffId, n
 
         // 2. 校验状态流转是否合法
         const allowedNextStatuses = VALID_TRANSITIONS[currentStatus] || [];
-        if (!allowedNextStatuses.includes(newStatus)) {
-            throw { 
-                code: 'INVALID_STATUS_TRANSITION', 
-                message: `Cannot change status from ${currentStatus} to ${newStatus}.` 
+        if (!allowedNextStatuses.includes(status)) {
+            throw {
+                code: 'INVALID_STATUS_TRANSITION',
+                message: `Cannot change status from ${currentStatus} to ${status}.`
             };
         }
 
@@ -95,23 +96,18 @@ export const updateKitchenOrderStatus = async (orderId, restaurantId, staffId, n
             UPDATE orders 
             SET status = $1, updated_at = NOW() 
             WHERE id = $2
-        `, [newStatus, orderId]);
+        `, [status, orderId]);
 
         // 4. 记录操作日志 (Audit Log)
         // 根据新状态决定 action 的名称
-        const action = newStatus === 'preparing' ? 'accepted' : 'completed';
-        
-        await client.query(`
-            INSERT INTO order_activity_logs (order_id, staff_user_id, action, note)
-            VALUES ($1, $2, $3, $4)
-        `, [orderId, staffId, action, `Status changed to ${newStatus} by kitchen staff`]);
+        const action = status === 'preparing' ? 'accepted' : 'completed';
 
         await client.query('COMMIT');
 
-        return { 
-            orderId, 
-            previousStatus: currentStatus, 
-            newStatus 
+        return {
+            orderId,
+            previousStatus: currentStatus,
+            status
         };
 
     } catch (error) {

@@ -1,4 +1,4 @@
-import { pool } from "../utils/db.js";
+import { pool, query } from "../utils/db.js";
 import crypto from 'crypto';
 
 export const processOrderCreation = async ({
@@ -307,3 +307,11 @@ export const processOrderCreation = async ({
         client.release();
     }
 };
+
+export const getRestaurantIdByOrderId = async (orderId) => {
+    const { rows } = await query(`
+        SELECT restaurant_id FROM orders
+        WHERE id = $1
+        `, [orderId])
+    return rows[0]?.restaurant_id ?? null;
+}

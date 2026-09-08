@@ -3,6 +3,7 @@ import KitchenDashboard from "./page/KitchenDashboard";
 import Login from "./page/Login";
 import { AuthProvider, useAuth } from './context/AuthContext';
 import WaitingApproval from './page/WaitingApproval';
+import Settings from './page/Settings';
 
 function AppContent() {
   const { authStatus } = useAuth();
@@ -17,6 +18,11 @@ function AppContent() {
       <Route
         path="/"
         element={authStatus === "authenticated" ? <KitchenDashboard /> : <Navigate to="/auth" />}
+      />
+
+      <Route
+        path="/settings"
+        element={authStatus === "authenticated" ? <Settings /> : <Navigate to="/auth" />}
       />
 
       <Route

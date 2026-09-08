@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../context/AuthContext";
-import { getOrders } from "../lib/api";
+import { getOrders, updateOrderStatus } from "../lib/api";
 import KitchenHeader from "../component/KitchenHeader";
 import OrderCard from "../component/OrderCard";
 import { COLUMN_STYLES, COLUMNS } from "../lib/columnStyles";
@@ -38,7 +38,7 @@ export default function KitchenDisplay() {
     // Fetch orders every 5 seconds
     const fetchOrders = useCallback(async () => {
         try {
-            const res = await getOrders("/kitchen/orders");
+            const res = await getOrders();
             const allOrders = res.data || [];
 
             setOrders({
@@ -64,10 +64,7 @@ export default function KitchenDisplay() {
 
     const updateStatus = async (orderId, newStatus) => {
         try {
-            await getOrders(`/kitchen/orders/${orderId}/status`, {
-                method: "PATCH",
-                body: JSON.stringify({ status: newStatus }),
-            });
+            await updateOrderStatus(orderId, newStatus)
             fetchOrders();
         } catch (err) {
             console.error("Failed to update status:", err);
@@ -104,6 +101,7 @@ export default function KitchenDisplay() {
         <div className="min-h-screen bg-[#0B0B0B] text-white">
             <KitchenHeader
                 deviceName={device?.device_name}
+                restaurantName={device.restaurant_name}
                 currentTime={currentTime}
                 soundEnabled={soundEnabled}
                 onToggleSound={() => setSoundEnabled((s) => !s)}

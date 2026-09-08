@@ -70,10 +70,6 @@ export default function OrderCard({ order, actionLabel, actionStatus, columnKey,
                     ))}
                 </div>
 
-                <p className="text-[11px] tracking-wide text-white/30 font-medium mt-4">
-                    CUSTOMER APP · PAID
-                </p>
-
                 {actionLabel && (
                     <button
                         onClick={() => onUpdateStatus(order.id, actionStatus)}

@@ -2,6 +2,7 @@ import { ChefHat, Calendar, Wifi, Volume2, VolumeX, Clock, Settings, LogOut } fr
 
 export default function KitchenHeader({
     deviceName,
+    restaurantName,
     currentTime,
     soundEnabled,
     onToggleSound,
@@ -16,7 +17,7 @@ export default function KitchenHeader({
                         <ChefHat size={20} className="text-orange-400" />
                     </div>
                     <div>
-                        <h1 className="text-xl font-bold tracking-wide">KITCHEN DISPLAY</h1>
+                        <h1 className="text-xl font-bold tracking-wide">KITCHEN DISPLAY FOR {restaurantName}</h1>
                         <p className="text-xs text-white/40 flex items-center gap-1">
                             <Calendar size={12} />
                             {new Date()
@@ -39,11 +40,10 @@ export default function KitchenHeader({
 
                     <button
                         onClick={onToggleSound}
-                        className={`text-xs font-semibold rounded-full px-3 py-1.5 border flex items-center gap-1.5 ${
-                            soundEnabled
-                                ? "text-orange-400 bg-orange-500/10 border-orange-500/20"
-                                : "text-white/40 bg-white/5 border-white/10"
-                        }`}
+                        className={`text-xs font-semibold rounded-full px-3 py-1.5 border flex items-center gap-1.5 ${soundEnabled
+                            ? "text-orange-400 bg-orange-500/10 border-orange-500/20"
+                            : "text-white/40 bg-white/5 border-white/10"
+                            }`}
                     >
                         {soundEnabled ? <Volume2 size={14} /> : <VolumeX size={14} />}
                         {soundEnabled ? "ORDER SOUND ON" : "MUTED"}

@@ -20,7 +20,6 @@ export const register = async (registerData) => {
 
 export const getOrders = async () => {
     const response = await axiosInstance.get("/kitchen/orders");
-    // Note: if your backend route is just "/orders", change to axiosInstance.get("/orders")
     return response.data;
 };
 

@@ -19,7 +19,8 @@ export const registerDevice = async (req, res, next) => {
             message: "Device registered. Waiting for admin to approved",
             status: newDevice.status,
             device_uuid: newDevice.device_uuid,
-            token: newDevice.token
+            token: newDevice.token,
+            restaurant_name: restaurant.name
         })
 
     } catch (error) {
@@ -63,7 +64,8 @@ export const loginDevice = async (req, res) => {
             message: "Login successful",
             status: device.status,
             device_uuid: device.device_uuid,
-            token: device.token
+            token: device.token,
+            restaurant_name: restaurant.name
         });
 
     } catch (error) {

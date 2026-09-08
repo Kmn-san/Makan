@@ -1,4 +1,6 @@
 import * as kitchenService from "../service/kitchenService.js";
+import * as restaurantService from "../service/restaurantService.js";
+import * as orderService from "../service/orderService.js";
 
 export const getOrders = async (req, res) => {
     try {
@@ -22,10 +24,13 @@ export const getOrders = async (req, res) => {
 
 export const updateOrderStatus = async (req, res) => {
     try {
-        const staff = req.staff; // 从 verifyStaffToken 中间件获取
         const { orderId } = req.params;
         const { status } = req.body; // 前端传来的新状态 (例如 'preparing' 或 'ready')
-
+        
+        const restaurantId = await orderService.getRestaurantIdByOrderId(orderId)
+        if (!restaurantId) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
         if (!status) {
             return res.status(400).json({
                 success: false,
@@ -36,7 +41,6 @@ export const updateOrderStatus = async (req, res) => {
         const result = await kitchenService.updateKitchenOrderStatus(
             orderId,
             restaurantId,
-            staff.staffId,
             status
         );
 
