@@ -1,7 +1,7 @@
 import { query } from "../utils/db.js"
 import crypto from "crypto";
 
-export const createDeviceUsingRestaurantId = async (restaurantId) => {
+export const createDeviceUsingRestaurantId = async (restaurant, deviceType) => {
     const device_uuid = crypto.randomUUID();
     const token = crypto.randomBytes(32).toString('hex');
     const { rows } = await query(
@@ -9,13 +9,14 @@ export const createDeviceUsingRestaurantId = async (restaurantId) => {
         device_uuid,
         restaurant_id,
         token,
+        device_name,
         status
         ) 
         VALUES(
-        $1, $2, $3,'pending'
+        $1, $2, $3, $4,'pending'
         )
         RETURNING * 
-        `, [device_uuid, restaurantId, token]
+        `, [device_uuid, restaurant.id, token, `${deviceType} ${restaurant.name}`]
     )
     return rows[0]
 }

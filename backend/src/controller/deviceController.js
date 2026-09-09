@@ -3,7 +3,8 @@ import * as restaurantService from "../service/restaurantService.js";
 
 export const registerDevice = async (req, res, next) => {
     try {
-        const { restaurantCode } = req.body;
+        const { restaurantCode, deviceType } = req.body;
+
         if (!restaurantCode) {
             return res.status(404).json({ success: false, message: "Restaurant Id must be insert" })
         }
@@ -13,7 +14,7 @@ export const registerDevice = async (req, res, next) => {
             return res.status(404).json({ success: false, message: "No such restaurant" });
         }
 
-        const newDevice = await deviceService.createDeviceUsingRestaurantId(restaurant.id)
+        const newDevice = await deviceService.createDeviceUsingRestaurantId(restaurant, deviceType)
         return res.status(201).json({
             success: true,
             message: "Device registered. Waiting for admin to approved",
@@ -64,8 +65,10 @@ export const loginDevice = async (req, res) => {
             message: "Login successful",
             status: device.status,
             device_uuid: device.device_uuid,
+            device_name: device.device_name,
             token: device.token,
-            restaurant_name: restaurant.name
+            restaurant_name: restaurant.name,
+            restaurant_image: restaurant.image_url
         });
 
     } catch (error) {
@@ -109,7 +112,7 @@ export const updateDeviceName = async (req, res) => {
         if (!device) {
             return res.status(404).json({ success: false, message: "No such device" })
         }
-        const updateDevice = await deviceService.updateName(device_uuid, deviceName)
+        const updatedDevice = await deviceService.updateName(device_uuid, deviceName)
         if (!updatedDevice) {
             return res.status(404).json({ success: false, message: "No such device" });
         }

@@ -1,30 +1,58 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { ChefHat, ShieldCheck, HelpCircle, Clock } from "lucide-react";
-import { staffLogin } from "../lib/staffApi";
+import { useAuth } from "../context/AuthContext";
 
 export default function POSLogin() {
-    const [employeeId, setEmployeeId] = useState("");
+    const [staffCode, setStaffCode] = useState("");
     const [pin, setPin] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [currentTime, setCurrentTime] = useState("");
+    const [currentDate, setCurrentDate] = useState("");
     const navigate = useNavigate();
+    const { device, staffLogin } = useAuth();
+
+    // Live clock — updates every second
+    useEffect(() => {
+        const updateClock = () => {
+            const now = new Date();
+            setCurrentTime(
+                now.toLocaleTimeString("en-US", {
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: true,
+                })
+            );
+            setCurrentDate(
+                now.toLocaleDateString("en-US", {
+                    weekday: "long",
+                    month: "long",
+                    day: "numeric",
+                })
+            );
+        };
+        updateClock();
+        const interval = setInterval(updateClock, 1000);
+        return () => clearInterval(interval);
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
 
-        if (!employeeId || !pin) {
+        if (!staffCode || !pin) {
             setError("Enter your employee ID and PIN");
             return;
         }
 
         try {
             setLoading(true);
-            await staffLogin({ employeeId, pin });
-            navigate("/"); // or wherever the POS main screen lives
+            await staffLogin({ staffCode, pin }); // context handles restaurantId/device_uuid internally
+            navigate("/");
         } catch (err) {
             setError(err.response?.data?.message || "Invalid employee ID or PIN. Please try again.");
+            setPin("")
         } finally {
             setLoading(false);
         }
@@ -41,8 +69,12 @@ export default function POSLogin() {
                             <ChefHat size={20} className="text-white" />
                         </div>
                         <div>
-                            <p className="font-bold text-gray-900 leading-tight">Rempah POS</p>
-                            <p className="text-xs text-gray-500 leading-tight">Cashier Terminal · Counter 02</p>
+                            <p className="font-bold text-gray-900 leading-tight">
+                                {device?.device_name || "POS Terminal"}
+                            </p>
+                            <p className="text-xs text-gray-500 leading-tight">
+                                {device?.restaurant_name || "Cashier Terminal"}
+                            </p>
                         </div>
                     </div>
 
@@ -64,9 +96,9 @@ export default function POSLogin() {
                             </label>
                             <input
                                 type="text"
-                                value={employeeId}
-                                onChange={(e) => setEmployeeId(e.target.value)}
-                                placeholder="EMP-1043"
+                                value={staffCode}
+                                onChange={(e) => setStaffCode(e.target.value)}
+                                placeholder="Insert your ID"
                                 disabled={loading}
                                 className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
                             />
@@ -78,7 +110,7 @@ export default function POSLogin() {
                                 type="password"
                                 value={pin}
                                 onChange={(e) => setPin(e.target.value)}
-                                placeholder="••••"
+                                placeholder="Insert your pin"
                                 disabled={loading}
                                 className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 tracking-widest focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
                             />
@@ -122,15 +154,16 @@ export default function POSLogin() {
                 <div
                     className="absolute inset-0 bg-cover bg-center"
                     style={{
-                        backgroundImage:
-                            "linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0.05)), url('/images/kitchen-counter.jpg')",
+                        backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0.05)), url('${device?.restaurant_image || "/image/pos-image.jpg"
+                            }')`,
                     }}
                 />
+                <div className="absolute top-10 right-10 text-right text-white">
+                    <p className="text-5xl font-bold leading-none tracking-tight">{currentTime}</p>
+                    <p className="text-lg text-white/80 mt-2">{currentDate}</p>
+                </div>
                 <div className="absolute bottom-10 left-10 right-10 text-white">
-                    <p className="text-2xl font-bold leading-snug mb-2">
-                        Lunch rush ready. 7 open orders waiting at the counter.
-                    </p>
-                    <p className="text-sm text-white/70">Rempah Kitchen · Bangsar Outlet</p>
+                    <p className="text-sm text-white/70">{device?.restaurant_name || "Cashier Terminal"}</p>
                 </div>
             </div>
         </div>

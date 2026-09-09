@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../context/AuthContext";
-import { CookingPot, MapPin, AlertCircle } from "lucide-react";
+import { ChefHat, MapPin, AlertCircle } from "lucide-react";
 
-export default function Login() {
+export default function DeviceLogin() {
     const [restaurantCode, setRestaurantCode] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -29,6 +29,8 @@ export default function Login() {
                 navigate("/");
             }
         } catch (err) {
+            console.log(err);
+
             const backendMessage = err.response?.data?.message;
             if (backendMessage?.toLowerCase().includes("revoked")) {
                 clearInvalidDevice();
@@ -42,19 +44,24 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 space-y-6">
-                {/* Header */}
-                <div className="text-center">
-                    <div className="mx-auto w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center mb-4">
-                        <CookingPot size={30} className="text-white" />
+        <div className="min-h-screen bg-[#FAF8F4] flex items-center justify-center px-6 py-12">
+            <div className="w-full max-w-sm">
+                <div className="flex items-center gap-3 mb-10">
+                    <div className="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center">
+                        <ChefHat size={20} className="text-white" />
                     </div>
-                    <h2 className="text-3xl font-bold text-gray-800">Welcome Back</h2>
-                    <p className="text-gray-500 mt-2">Login to your kitchen dashboard</p>
+                    <div>
+                        <p className="text-xs text-gray-500 leading-tight">Device Setup</p>
+                    </div>
                 </div>
 
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Register this device</h1>
+                <p className="text-sm text-gray-500 mb-8">
+                    Enter your restaurant code to connect this terminal.
+                </p>
+
                 {error && (
-                    <div role="alert" className="alert alert-error alert-soft">
+                    <div role="alert" className="alert alert-error alert-soft mb-5">
                         <AlertCircle size={18} />
                         <span className="text-sm">{error}</span>
                     </div>

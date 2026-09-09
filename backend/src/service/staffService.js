@@ -11,7 +11,7 @@ export const staffExist = async (restaurantId, staffCode) => {
 
 export const injectSession = async (staffId, token, device, expiresAt) => {
     const { rows } = await query(`
-        INSERT INTO staff_sessions (staff_user_id,token_hash,device_name,expires_at)
+        INSERT INTO staff_sessions (staff_user_id,token_hash,device_uuid,expires_at)
         VALUES($1,$2,$3,$4)
         `,
         [staffId, token, device, expiresAt])

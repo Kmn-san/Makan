@@ -1,17 +1,23 @@
+import * as restaurantService from "../service/restaurantService.js";
 import * as staffService from "../service/staffService.js"
 import bcrypt from "bcryptjs";
 import crypto from 'crypto';
 
 export const staffLogin = async (req, res) => {
-    const { restaurantId, staffCode, pin, deviceName } = req.body;
+    const { restaurantCode, staffCode, pin, deviceUuid } = req.body;
 
-    if (!restaurantId || !staffCode || !pin) {
+
+    if (!restaurantCode || !staffCode || !pin) {
         return res.status(400).json({
             success: false, message: "All fields are required!"
         })
     }
+    const restaurant = await restaurantService.getRestaurantByCode(restaurantCode);
+    if (!restaurant) {
+        return res.status(404).json({ success: false, message: "No such restaurant" });
+    }
     try {
-        const staffResult = await staffService.staffExist(restaurantId, staffCode)
+        const staffResult = await staffService.staffExist(restaurant.id, staffCode)
 
         if (!staffResult) {
             return res.status(401).json({ success: false, message: "Invalid staff code or PIN" })
@@ -35,16 +41,7 @@ export const staffLogin = async (req, res) => {
         const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
         const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // invalid after 24 hours
 
-        await staffService.injectSession(staffResult.id, tokenHash, deviceName || "Unknown Device", expiresAt)
-
-        const existingShift = await staffService.existShift(staffResult.id)
-
-        let shift;
-        if (existingShift.length > 0) {
-            shift = existingShift[0]
-        } else {
-            shift = await staffService.newShift(staffResult.id)
-        }
+        await staffService.injectSession(staffResult.id, tokenHash, deviceUuid, expiresAt)
 
         return res.status(200).json({
             success: true,
@@ -56,10 +53,6 @@ export const staffLogin = async (req, res) => {
                 role: staffResult.role,
                 restaurantId: staffResult.restaurant_id,
                 staffCode: staffResult.staff_code
-            },
-            shift: {
-                id: shift.id,
-                clockInAt: shift.clock_in_at
             }
         })
 
@@ -81,11 +74,9 @@ export const staffLogout = async (req, res) => {
     try {
         const { name, staffId, sessionId } = req.staff;
         await staffService.revokeSession(sessionId);
-        const closedShift = await staffService.clockOutShift(staffId)
         return res.status(200).json({
             success: true,
-            message: `${name} logged out successfully. Have a good rest!`,
-            shiftClosed: closedShift ? true : false
+            message: `${name} logged out successfully. Have a good rest!`
         })
     } catch (error) {
         console.error('Staff logout error:', error);

@@ -12,7 +12,7 @@ export const getActiveRestaurants = async () => {
 
 export const getRestaurantByCode = async (code) => {
     const { rows } = await query(`
-        SELECT id, name, address
+        SELECT id, name, address,image_url
         FROM restaurant
         WHERE is_active = TRUE AND code = $1
     `, [code]);
