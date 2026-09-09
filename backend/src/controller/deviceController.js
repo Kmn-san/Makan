@@ -13,7 +13,7 @@ export const registerDevice = async (req, res, next) => {
             return res.status(404).json({ success: false, message: "No such restaurant" });
         }
 
-        const newDevice = await deviceService.createDeviceUsingRestaurandId(restaurant.id)
+        const newDevice = await deviceService.createDeviceUsingRestaurantId(restaurant.id)
         return res.status(201).json({
             success: true,
             message: "Device registered. Waiting for admin to approved",

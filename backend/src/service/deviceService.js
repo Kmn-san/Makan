@@ -1,7 +1,7 @@
 import { query } from "../utils/db.js"
 import crypto from "crypto";
 
-export const createDeviceUsingRestaurandId = async (restaurantId) => {
+export const createDeviceUsingRestaurantId = async (restaurantId) => {
     const device_uuid = crypto.randomUUID();
     const token = crypto.randomBytes(32).toString('hex');
     const { rows } = await query(
